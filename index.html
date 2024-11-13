@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button onclick="getMessage()">Get Message</button>
+    <p id="res" class="res"></p>
+
+    <script>
+        function getMessage() {
+            const xhr = new XMLHttpRequest()
+            xhr.open('GET', 'server.php', true)
+
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById('res').innerHTML = xhr.responseText
+                }
+            }
+            xhr.send()
+        }
+    </script>
+    <style>
+        .res {
+            max-width: 200px;
+            display: flex;
+            text-align: center;
+            color: brown;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 25px;
+        }
+    </style>
+</body>
+
+</html>
