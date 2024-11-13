@@ -1,109 +1,94 @@
 $(document).ready(function() {
-  
-  $('#container').hide();
+  // Función para cargar todas las tareas
+  function loadTasks() {
+    $.ajax({
+      url: "tasks_list.php",
+      type: "GET",
+      success: function(r) {
+        console.log('Respuesta recibida: ', r);
 
-  $('#search').keyup(function(e) {
-  
-    let search = $('#search').val();  // Obtenemos el término de búsqueda
-  
-    if (search.length > 0) {
-      $.ajax({
-        url: 'search_server.php',
-        type: 'POST',
-        data: { search },
-        dataType: 'text',  // Cambiamos el tipo de respuesta a texto
-        success: function(res) {
-          console.log('Respuesta recibida del servidor:', res);  // Mostramos la respuesta completa
-          try {
-            let tasks = JSON.parse(res);  // Intentamos parsear el JSON
-            let template = '';
-            if (tasks.length > 0) {             
-
-              tasks.forEach(t => {
-                template += `
-                  <div class="col-md-4">
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">${t.name}</h5>
-                        <p class="card-text">${t.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              });
-            } else {
-              template = '<p>No se encontraron tareas.</p>';
-            }
-            $('#task-result').html(template);  // Insertamos el HTML generado
-            $('#container').show();
-          } catch (e) {
-            console.error("Error al parsear JSON: ", e);
+        // Parsear la respuesta
+        try {
+          let tasks = (typeof r === 'string') ? JSON.parse(r) : r;
+          
+          let template = '';
+          
+          // Verificamos si hay tareas
+          if (tasks.length > 0) {
+            tasks.forEach(task => {
+              template += `
+                <tr>
+                  <td>${task.id}</td>
+                  <td>${task.name}</td>
+                  <td>${task.description}</td>
+                  <td>${task.createdAt}</td>
+                  <td>
+                    <button>eliminar</button>
+                  </td>
+                </tr>
+              `;
+            });
+          } else {
+            template = '<tr><td colspan="4">No se encontraron tareas.</td></tr>';
           }
-        },
-        error: function(xhr, status, error) {
-          console.error("Error en la solicitud AJAX:", status, error);
+          
+          // Inyectar las tareas en el cuerpo de la tabla
+          $('#task-table-body').html(template);
+          $('#container').show();  // Mostrar la sección de tareas
+        } catch (e) {
+          console.error("Error al parsear JSON: ", e);
         }
-      });
-    } else {
-      $('#task-result').html('');  // Limpiamos los resultados si no hay búsqueda
-    }
-  });
+      },
+      error: function(xhr, status, error) {
+        console.log('Error en la solicitud: ', status, error);
+      }
+    });
+  }
 
+  // Llamar la función para cargar las tareas cuando la página se cargue por primera vez
+  loadTasks();
 
-
-
-
-  // capturar formulario para agregar tareas
-  //
-  $('#task-form').submit(function(e){
-
+  // Capturar formulario para agregar tareas
+  $('#task-form').submit(function(e) {
     e.preventDefault();
-    //console.log('cargando datos>>>')
-
-    //input task-name
-    //input task-description
     
-    $name= $('#task-name').val()
-    $description = $('#task-description').val()
+    // Obtener valores de los campos de formulario
+    let $name = $('#task-name').val();
+    let $description = $('#task-description').val();
 
-    console.log($name)
-    console.log($description)
+    console.log('Tarea:', $name);
+    console.log('Descripción:', $description);
 
     const data = {
       name: $name,
       description: $description
-    }
-    
+    };
 
-    $.post('task_add.php', data, function(r){
+    // Enviar datos al servidor para agregar la tarea
+    $.post('task_add.php', data, function(r) {
+      console.log('Respuesta del servidor: ', r);
+
+      // Limpiar el formulario
       $('#task-name').val('');
       $('#task-description').val('');
-      console.log(r)
 
+      // Después de agregar la tarea, volvemos a cargar las tareas
+      loadTasks(); // Aquí recargamos las tareas
     });
+  });
 
-    // las funciones o peticiones que no estan dentro de un evento se ejecutan una vez que se inicia
-    // la aplicación, por ende pueden ser utilizadas para rellenar una tabla, por ejemplo.
-    
+  $('#search').keyup(function(e){
+    let searchTerm = $('#search').val();
+    console.log(searchTerm);
     $.ajax({
-      url:"tasks_list.php",
-      type: "GET",
+      url:'search_server.php',
+      type:'POST',
       success: function(r){
-        console.log('Petición ejecutada cuando se cargo la pagina: ', r)
+       console.log('respuesta de busqueda', r); 
       }
-    })
-
+    });
   })
-
 });
-
-
-
-
-
-
-
-
 
 
 

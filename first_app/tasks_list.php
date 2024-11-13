@@ -1,29 +1,28 @@
-##obtener datos de mysql y guardar en variantes
-
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-  include("conn.php");
-  
-  $query = "SELECT * FROM taskList";
+include("conn.php");
 
-  $result = mysqli_query($connection, $query);
+header('Content-Type: application/json'); // Asegúrate de que la respuesta sea JSON
 
-  if(!$result){
-    die('Query failed', mysqli_error($connection));
-  };
+$query = "SELECT * FROM taskList";
+$result = mysqli_query($connection, $query);
 
-  $json = array[];
-  
-  while($row = msqli_fetch_array($result)){
+if (!$result) {
+    die('Query failed: ' . mysqli_error($connection));
+}
+
+$json = array();
+while ($row = mysqli_fetch_array($result)) {
     $json[] = array(
-      'name'=>$row['t_name'],
-      'description'=>$row['t_descript'],
-      'createdAt'=>$row['t_createdAt'],
-      'id'=>$row['t_id']
+        'id' => $row['t_id'],
+        'name' => $row['t_name'],
+        'description' => $row['t_descript'],
+        'createdAt' => $row['t_createdAt']
     );
-  }
-  
-  
-  $jsonStr = json_encode($json);
-  echo $jsonStr;
+}
+
+echo json_encode($json);
+
 
